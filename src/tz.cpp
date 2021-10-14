@@ -113,6 +113,7 @@
 #include <tuple>
 #include <vector>
 #include <sys/stat.h>
+#include "date/untar.h"
 
 // unistd.h is used on some platforms as part of the the means to get
 // the current time zone. On Win32 windows.h provides a means to do it.
@@ -3207,58 +3208,10 @@ bool
 extract_gz_file(const std::string& version, const std::string& gz_file,
                 const std::string& dest_folder)
 {
-    auto unzip_prog = get_unzip_program();
-    bool unzip_result = false;
-    // Use the unzip program to extract the tar file from the archive.
+    bool unzip_result = untar::extract(gz_file, dest_folder);
 
-    // Aim to create a string like:
-    // "C:\Program Files\7-Zip\7z.exe" x "C:\Users\SomeUser\Downloads\tzdata2016d.tar.gz"
-    //     -o"C:\Users\SomeUser\Downloads\tzdata"
-    std::string cmd;
-    cmd = '\"';
-    cmd += unzip_prog;
-    cmd += "\" x \"";
-    cmd += gz_file;
-    cmd += "\" -o\"";
-    cmd += dest_folder;
-    cmd += '\"';
-
-#    if USE_SHELL_API
-    // When using shelling out with std::system() extra quotes are required around the
-    // whole command. It's weird but necessary it seems, see:
-    // http://stackoverflow.com/q/27975969/576911
-
-    cmd = "\"" + cmd + "\"";
-    if (std::system(cmd.c_str()) == EXIT_SUCCESS)
-        unzip_result = true;
-#    else  // !USE_SHELL_API
-    if (run_program(cmd) == EXIT_SUCCESS)
-        unzip_result = true;
-#    endif // !USE_SHELL_API
     if (unzip_result)
         delete_file(gz_file);
-
-    // Use the unzip program extract the data from the tar file that was
-    // just extracted from the archive.
-    auto tar_file = get_download_tar_file(version);
-    cmd = '\"';
-    cmd += unzip_prog;
-    cmd += "\" x \"";
-    cmd += tar_file;
-    cmd += "\" -o\"";
-    cmd += get_install();
-    cmd += '\"';
-#    if USE_SHELL_API
-    cmd = "\"" + cmd + "\"";
-    if (std::system(cmd.c_str()) == EXIT_SUCCESS)
-        unzip_result = true;
-#    else  // !USE_SHELL_API
-    if (run_program(cmd) == EXIT_SUCCESS)
-        unzip_result = true;
-#    endif // !USE_SHELL_API
-
-    if (unzip_result)
-        delete_file(tar_file);
 
     return unzip_result;
 }
