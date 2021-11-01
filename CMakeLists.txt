@@ -105,9 +105,11 @@ if( BUILD_TZ_LIB )
     target_sources( date-tz
       PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>$<INSTALL_INTERFACE:include>/date/tz.h
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>$<INSTALL_INTERFACE:include>/date/untar.h
       PRIVATE
         include/date/tz_private.h
-        src/tz.cpp )
+        src/tz.cpp
+        src/untar.cpp)
     if ( IOS )
       target_sources( date-tz
         PUBLIC
@@ -138,6 +140,7 @@ if( BUILD_TZ_LIB )
     endif()
 
     set(TZ_HEADERS include/date/tz.h)
+    list(APPEND TZ_HEADERS include/date/untar.h)
 
     if( IOS )
         list(APPEND TZ_HEADERS include/date/ios.h)
