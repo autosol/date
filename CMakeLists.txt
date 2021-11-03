@@ -34,7 +34,35 @@ option( BUILD_SHARED_LIBS  "Build a shared version of library" OFF )
 option( ENABLE_DATE_TESTING "Enable unit tests" OFF )
 option( DISABLE_STRING_VIEW "Disable string view" OFF )
 option( COMPILE_WITH_C_LOCALE "define ONLY_C_LOCALE=1" OFF )
-option( BUILD_TZ_LIB "build/install of TZ library" OFF )
+option( BUILD_TZ_LIB "build/install of TZ library" ON )
+
+#Test--------------------------------------------------------------------------------------------
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+  message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.16.1/conan.cmake"
+                "${CMAKE_BINARY_DIR}/conan.cmake"
+                EXPECTED_HASH SHA256=396e16d0f5eabdc6a14afddbcfff62a54a7ee75c6da23f32f7a31bc85db23484
+                TLS_VERIFY ON)
+endif()
+
+if(CONAN_EXPORTED) # in conan local cache
+	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	conan_basic_setup()
+else() # in user space
+	include(${CMAKE_BINARY_DIR}/conan.cmake)
+
+	conan_cmake_run(CONANFILE conanfile.py
+					BASIC_SETUP
+					BUILD missing)
+endif()
+
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+
+#Test--------------------------------------------------------------------------------------------
 
 if( ENABLE_DATE_TESTING AND NOT BUILD_TZ_LIB )
     message(WARNING "Testing requested, bug BUILD_TZ_LIB not ON - forcing the latter")
@@ -158,6 +186,10 @@ if( BUILD_TZ_LIB )
         find_package( CURL REQUIRED )
         target_include_directories( date-tz SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} )
         target_link_libraries( date-tz PRIVATE ${CURL_LIBRARIES} )
+        
+        find_package( LibArchive REQUIRED )
+        target_include_directories( date-tz SYSTEM PRIVATE ${LibArchive_INCLUDE_DIR} )
+        target_link_libraries( date-tz PRIVATE ${LibArchive_LIBRARY} )
     endif( )
 endif( )
 
