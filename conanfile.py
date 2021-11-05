@@ -46,6 +46,8 @@ class DateConan(ConanFile):
             self.options.use_system_tz_db = True
             
     def configure(self):
+        self.options['libcurl'].with_ssl = "openssl"
+        
         if self.options.shared:
             del self.options.fPIC
 
