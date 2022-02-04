@@ -1,6 +1,4 @@
 from conans import ConanFile, CMake, tools
-#from conan.tools.cmake import CMakeToolchain, CMake
-#from conan.tools.layout import cmake_layout
 import os
 
 required_conan_version = ">=1.33.0"
@@ -9,14 +7,14 @@ required_conan_version = ">=1.33.0"
 class DateConan(ConanFile):
     name = "date"
     version = "3.0.1"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/HowardHinnant/date"
+    homepage = "https://github.com/autosol/date" #Forked from https://github.com/HowardHinnant/date to add LibArchive support to untar tz db.
     description = "A date and time library based on the C++11/14/17 <chrono> header"
     topics = ("date", "datetime", "timezone",
               "calendar", "time", "iana-database")
     license = "MIT"
-    requires = "libarchive/3.5.1", "libcurl/7.78.0"
     settings = "os", "arch", "compiler", "build_type"
+    
+    #These options come from the package on conan.io.  With the exception of use_system_tz_db, AUTOSOL has tested only the default permutations.
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -33,8 +31,6 @@ class DateConan(ConanFile):
         "use_tz_db_in_dot": False,
     }
     exports_sources = ["CMakeLists.txt","src/*","include/*","cmake/*"]
-    #exports_sources = "*"
-    keep_imports = True
     
     generators = "cmake", "cmake_find_package"
     _cmake = None
@@ -46,7 +42,8 @@ class DateConan(ConanFile):
             self.options.use_system_tz_db = True
             
     def configure(self):
-        self.options['libcurl'].with_ssl = "openssl"
+        if not self.options.header_only and not self.options.use_system_tz_db:
+            self.options['libcurl'].with_ssl = "openssl"
         
         if self.options.shared:
             del self.options.fPIC
@@ -63,10 +60,6 @@ class DateConan(ConanFile):
     def package_id(self):
         if self.options.header_only:
             self.info.header_only()
-
-    #def source(self):
-        #self.run("git clone --depth 1 https://github.com/autosol/date.git")
-        #self.run("git clone --depth 1 file:///C/Code/autosol_date/.git date")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -90,12 +83,8 @@ class DateConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.build()
             
-    #def imports(self):
-        #self.copy("*")
-            
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses")
-        #self.copy("*")
 
         cmake = self._configure_cmake()
         cmake.install()

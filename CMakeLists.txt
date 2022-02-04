@@ -1,20 +1,3 @@
-#[===================================================================[
-   date library by Howard Hinnant
-
-   CMake projects that wish to use this library should consider
-   something like the following :
-
-     include( FetchContent )
-     FetchContent_Declare( date_src
-       GIT_REPOSITORY https://github.com/HowardHinnant/date.git
-       GIT_TAG        v3.0.1  # adjust tag/branch/commit as needed
-     )
-     FetchContent_MakeAvailable(date_src)
-     ...
-     target_link_libraries (my_target PRIVATE date::date)
-
-#]===================================================================]
-
 cmake_minimum_required( VERSION 3.7 )
 
 project( date VERSION 3.0.1 )
@@ -133,11 +116,19 @@ if( BUILD_TZ_LIB )
     target_sources( date-tz
       PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>$<INSTALL_INTERFACE:include>/date/tz.h
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>$<INSTALL_INTERFACE:include>/date/untar.h
       PRIVATE
         include/date/tz_private.h
-        src/tz.cpp
-        src/untar.cpp)
+        src/tz.cpp)
+		
+	if ( NOT USE_SYSTEM_TZ_DB )
+      target_sources( date-tz
+        PUBLIC
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>$<INSTALL_INTERFACE:include>/date/untar.h
+        PRIVATE
+          include 
+            src/untar.cpp)
+	endif()
+		
     if ( IOS )
       target_sources( date-tz
         PUBLIC
@@ -168,7 +159,10 @@ if( BUILD_TZ_LIB )
     endif()
 
     set(TZ_HEADERS include/date/tz.h)
-    list(APPEND TZ_HEADERS include/date/untar.h)
+	
+	if ( NOT USE_SYSTEM_TZ_DB )
+      list(APPEND TZ_HEADERS include/date/untar.h)
+	endif()
 
     if( IOS )
         list(APPEND TZ_HEADERS include/date/ios.h)
