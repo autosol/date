@@ -38,7 +38,6 @@ int untar::copy_data(struct archive* ar, struct archive* aw)
 bool untar::extract(const std::string& filename, const std::string& destinationFolder)
 {
 	struct archive* output = archive_write_disk_new();
-	//TODO: Need to double check these flags.
 	int flags = ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_ACL | ARCHIVE_EXTRACT_FFLAGS;
 	archive_write_disk_set_options(output, flags);
 

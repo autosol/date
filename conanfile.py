@@ -51,7 +51,7 @@ class DateConan(ConanFile):
     def requirements(self):        
         if not self.options.header_only and not self.options.use_system_tz_db:
             self.requires("libcurl/7.78.0")
-            self.requires("libarchive/3.5.1")
+            self.requires("libarchive/3.5.2")
 
     def validate(self):
         if self.settings.compiler.cppstd:
