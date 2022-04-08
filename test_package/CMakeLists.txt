@@ -9,9 +9,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CONAN_SYSTEM_INCLUDES ON) #Hide warnings from libraries
 
 message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.17.0/conan.cmake"
+file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
 	"${CMAKE_BINARY_DIR}/conan.cmake"
-	EXPECTED_HASH SHA256=3bef79da16c2e031dc429e1dac87a08b9226418b300ce004cc125a82687baeef
+	EXPECTED_HASH SHA256=5cdb3042632da3efff558924eecefd580a0e786863a857ca097c3d1d43df5dcd
 	TLS_VERIFY ON
 	STATUS DOWNLOAD_STATUS)
 		
@@ -40,6 +40,5 @@ find_package(date CONFIG REQUIRED)
 add_executable(example src/example.cpp)
 #include_directories(${CONAN_INCLUDE_DIRS})
 target_include_directories(example
-  #PRIVATE ${date_INCLUDE_DIRS_RELEASE})#${CONAN_INCLUDE_DIRS})
   PRIVATE ${CONAN_INCLUDE_DIRS_DATE})
 target_link_libraries(example date::date)
